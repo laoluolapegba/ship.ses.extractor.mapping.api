@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ship.Ses.Extractor.Presentation.Api</name>
+    </assembly>
+    <members>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.GetTables">
+            <summary>
+            Retrieves a list of EMR tables.
+            </summary>
+            <returns>A list of EMR tables.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.GetTableSchema(System.String)">
+            <summary>
+            Retrieves the schema for a specific EMR table.
+            </summary>
+            <param name="tableName">The name of the table.</param>
+            <returns>The schema of the specified table.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.TestConnection">
+            <summary>
+            Tests the EMR database connection.
+            </summary>
+            <returns>Result of the connection test.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.GetConnections">
+            <summary>
+            Retrieves a list of active EMR connections.
+            </summary>
+            <returns>A list of EMR connections.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.SelectConnection(System.Int32)">
+            <summary>
+            Selects a specific EMR connection by ID.
+            </summary>
+            <param name="id">The ID of the EMR connection.</param>
+            <returns>Result of the selection operation.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.GetConnectionById(System.Int32)">
+            <summary>
+            Retrieves a specific EMR connection by its ID.
+            </summary>
+            <param name="id">The unique identifier of the EMR connection.</param>
+            <returns>The EMR connection details.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.CreateConnection(Ship.Ses.Extractor.Application.DTOs.EmrConnectionDto)">
+            <summary>
+            Creates a new EMR connection.
+            </summary>
+            <param name="connectionDto">The EMR connection data.</param>
+            <returns>The ID of the created connection.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.UpdateConnection(System.Int32,Ship.Ses.Extractor.Application.DTOs.EmrConnectionDto)">
+            <summary>
+            Updates an existing EMR connection.
+            </summary>
+            <param name="id">The ID of the EMR connection to update.</param>
+            <param name="connectionDto">The updated EMR connection data.</param>
+            <returns>No content if successful.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.DeleteConnection(System.Int32)">
+            <summary>
+            Deletes an EMR connection.
+            </summary>
+            <param name="id">The ID of the EMR connection to delete.</param>
+            <returns>No content if successful.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.TestConnectionById(System.Int32)">
+            <summary>
+            Tests a specific EMR connection by ID.
+            </summary>
+            <param name="id">The ID of the EMR connection.</param>
+            <returns>Result of the connection test.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.MappingsController.GetResourceTypes">
+            <summary>
+            Retrieves all supported FHIR resource types.
+            </summary>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.MappingsController.GetResourceStructure(System.Int32)">
+            <summary>
+            Retrieves the JSON structure of a specific FHIR resource type.
+            </summary>
+            <param name="resourceTypeId">The ID of the FHIR resource type.</param>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.MappingsController.GetMappings">
+            <summary>
+            Retrieves all mapping definitions.
+            </summary>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.MappingsController.GetMapping(System.Guid)">
+            <summary>
+            Retrieves a specific mapping by its ID.
+            </summary>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.MappingsController.GetMappingsByResourceType(System.Int32)">
+            <summary>
+            Retrieves mappings associated with a specific FHIR resource type.
+            </summary>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.MappingsController.CreateMapping(Ship.Ses.Extractor.Application.DTOs.MappingDefinitionDto)">
+            <summary>
+            Creates a new mapping definition.
+            </summary>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.MappingsController.UpdateMapping(System.Guid,Ship.Ses.Extractor.Application.DTOs.MappingDefinitionDto)">
+            <summary>
+            Updates an existing mapping definition.
+            </summary>
+            <param name="id">The unique identifier of the mapping to update.</param>
+            <param name="mappingDto">The updated mapping definition.</param>
+            <returns>No content if the update is successful.</returns>
+        </member>
+        <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.MappingsController.DeleteMapping(System.Guid)">
+            <summary>
+            Deletes a mapping definition by its unique identifier.
+            </summary>
+            <param name="id">The unique identifier of the mapping to delete.</param>
+            <returns>No content if the deletion is successful.</returns>
+        </member>
+    </members>
+</doc>

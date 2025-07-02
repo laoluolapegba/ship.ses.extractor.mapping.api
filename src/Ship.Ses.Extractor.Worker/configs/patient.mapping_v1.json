@@ -1,0 +1,238 @@
+{
+    "resourceType": "Patient",
+    "tableName": "patients",
+    "fields": [
+        {
+            "emrField": "patient_id",
+            "fhirPath": "id",
+            "dataType": "string",
+            "required": true
+        },
+        {
+            "emrField": "inactive",
+            "fhirPath": "active",
+            "dataType": "bool"
+        },
+        {
+            "emrField": "marital_status",
+            "fhirPath": "maritalStatus.coding[0].code",
+            "dataType": "string",
+            "required": true
+        },
+        {
+            "emrField": "marital_status",
+            "fhirPath": "maritalStatus.text",
+            "dataType": "string"
+        },
+        {
+            "emrField": "forename",
+            "fhirPath": "name[0].given[0]",
+            "dataType": "string",
+            "required": true
+        },
+        {
+            "emrField": "surname",
+            "fhirPath": "name[0].family",
+            "dataType": "string",
+            "required": true
+        },
+        {
+            "emrField": "title",
+            "fhirPath": "name[0].prefix[0]",
+            "dataType": "string",
+            "required": true
+        },
+        {
+            "emrField": "gender",
+            "fhirPath": "gender",
+            "dataType": "string",
+            "required": true
+        },
+        {
+            "emrField": "dob",
+            "fhirPath": "birthDate",
+            "dataType": "date",
+            "format": "yyyy-MM-dd",
+            "required": true
+        },
+        {
+            "emrField": "phone",
+            "fhirPath": "telecom[0].value",
+            "dataType": "string",
+            "required": true
+        },
+        {
+            "emrField": "email",
+            "fhirPath": "telecom[1].value",
+            "dataType": "string"
+        },
+        {
+            "emrField": "address",
+            "fhirPath": "address[0].line[0]",
+            "dataType": "string",
+            "required": true
+        },
+        {
+            "emrField": "origin_lga",
+            "fhirPath": "address[0].city",
+            "dataType": "string"
+        },
+        {
+            "emrField": "origin_state",
+            "fhirPath": "address[0].state",
+            "dataType": "string"
+        },
+        {
+            "emrField": "__empty__",
+            "fhirPath": "address[0].postalCode",
+            "dataType": "string"
+        },
+        {
+            "emrField": "origin_country",
+            "fhirPath": "address[0].country",
+            "dataType": "string"
+        },
+        {
+            "emrField": "nok_full_name",
+            "fhirPath": "contact[0].name.given[0]",
+            "dataType": "string"
+        },
+        {
+            "emrField": "nok_full_name",
+            "fhirPath": "contact[0].name.family",
+            "dataType": "string"
+        },
+        {
+            "emrField": "gender",
+            "fhirPath": "contact[0].gender",
+            "dataType": "string"
+        },
+        {
+            "emrField": "nok_phone",
+            "fhirPath": "contact[0].telecom[0].value",
+            "dataType": "string"
+        },
+        {
+            "emrField": "nok_address",
+            "fhirPath": "contact[0].address.line[0]",
+            "dataType": "string"
+        },
+        {
+            "emrField": "nok_address",
+            "fhirPath": "contact[0].address.city",
+            "dataType": "string"
+        },
+        {
+            "emrField": "nok_address",
+            "fhirPath": "contact[0].address.state",
+            "dataType": "string"
+        },
+        {
+            "emrField": "nok_address",
+            "fhirPath": "contact[0].address.country",
+            "dataType": "string"
+        },
+        {
+            "emrField": "__empty__",
+            "fhirPath": "contact[0].organization.reference",
+            "dataType": "string"
+        },
+        {
+            "emrField": "__empty__",
+            "fhirPath": "contact[0].organization.display",
+            "dataType": "string"
+        },
+        {
+            "emrField": "__empty__",
+            "fhirPath": "contact[0].period.start",
+            "dataType": "datetime",
+            "format": "yyyy-MM-ddTHH:mm:ss.fffZ",
+            "required": false
+        },
+        {
+            "emrField": "__empty__",
+            "fhirPath": "contact[0].period.end",
+            "dataType": "datetime",
+            "format": "yyyy-MM-ddTHH:mm:ss.fffZ"
+        },
+
+        {
+            "emrField": "",
+            "fhirPath": "identifier[0].type.text",
+            "dataType": "string"
+        },
+        {
+            "emrField": "",
+            "fhirPath": "identifier[0].system",
+            "dataType": "string"
+        },
+        {
+            "emrField": "nin",
+            "fhirPath": "identifier[0].value",
+            "dataType": "string",
+            "required": true
+        },
+        {
+            "emrField": "",
+            "fhirPath": "identifier[0].use",
+            "dataType": "string"
+        },
+        {
+            "emrField": "",
+            "fhirPath": "identifier[0].type.coding[0].system",
+            "dataType": "string"
+        },
+        {
+            "emrField": "",
+            "fhirPath": "identifier[0].type.coding[0].code",
+            "dataType": "string"
+        },
+        {
+            "emrField": "",
+            "fhirPath": "identifier[0].type.coding[0].display",
+            "dataType": "string"
+        },
+        {
+            "emrField": "",
+            "fhirPath": "managingOrganization.reference",
+            "dataType": "string"
+        },
+        {
+            "emrField": "",
+            "fhirPath": "managingOrganization.display",
+            "dataType": "string"
+        }
+    ],
+    "constants": {
+        "identifier[0].type.coding[0].system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "identifier[0].type.coding[0].code": "NIN",
+        "identifier[0].type.coding[0].display": "National Iderntification Number",
+        "identifier[0].type.text": "National Iderntification Number",
+        "identifier[0].use": "official",
+        "identifier[0].system": "http://hospital.smarthealth.org/patient-ids",
+        "contact[0].relationship": [
+            {
+                "coding": [
+                    {
+                        "system": "https://terminology.hl7.org/CodeSystem/v2-0131",
+                        "code": "N",
+                        "display": "Next of Kin"
+                    }
+                ],
+                "text": "Next of Kin"
+            },
+            {
+                "coding": [
+                    {
+                        "system": "https://terminology.hl7.org/CodeSystem/v2-0131",
+                        "code": "C",
+                        "display": "Emergency Contact"
+                    }
+                ],
+                "text": "Emergency Contact"
+            }
+        ],
+        "managingOrganization.reference": "Organization/9de8fb7c-334b-41e9-a855-5e4c6450987c",
+        "managingOrganization.display": "Example Hospital"
+    }    
+}
