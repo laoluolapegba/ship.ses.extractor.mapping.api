@@ -1,196 +1,91 @@
-# SHIP Edge Server (SeS) - Data Extraction Component
-🚀 **ship.ses.extractor**  
+# SHIP SeS Extractor Mapping API
 
-![Deploy Status](https://olasunkanmifadayomi@bitbucket.org/interswitch/ship-ses-extractor-service/actions/workflows/deployuat.yml/badge.svg)
+This repository contains the **Mapping API and services** for the **Smart Health Information Platform (SHIP) SeS Extractor**, which enables flexible, facility-specific EMR-to-FHIR mapping for health data synchronization.
 
-## Overview
-The **SHIP Edge Server (SeS) - Data Extraction Component** (**`ship.ses.extractor`**) is responsible for extracting healthcare data from **various EMR systems** and preparing it for transformation and synchronization with the **SHIP Core Platform**.
+It is part of the broader SHIP Edge Server (SeS) ecosystem and is designed to support dynamic field transformation, hybrid mapping scenarios, and self-service onboarding of health facilities with minimal technical overhead.
 
-This service is part of the **SHIP Edge Server (SeS)** and is implemented using **.NET Core**, following **Domain-Driven Design (DDD)** principles for maintainability and scalability.
+---
+
+##  Repository Structure
 
 ---
 
 ## Features
-✅ **Multiple Data Extraction Methods**:
-- **FHIR API** (For modern EMRs).
-- **Custom API integration** (For non-FHIR EMRs).
-- **Database extraction** (SQL and NoSQL support).
-- **File-based ingestion** (XML/JSON formats).
-
-✅ **Background worker service** for scheduled data pulls.  
-✅ Implements **retry logic** for failed extractions.  
-✅ Logs extraction events for **auditability**.  
-✅ Secure **OAuth2 authentication** for API-based data extraction.  
-✅ **Domain-Driven Design (DDD)** structured architecture.  
+ **Dynamic EMR-to-FHIR mapping engine** for Patient and related resources
+-  **Fallback logic** for prioritized fields (e.g., NIN → BVN → Passport)
+-  **Extensible mapping templates** for name, address, contact, identifiers, telecom, etc.
+-  **Built-in validation hooks** for data completeness and standardization
+-  **API-first design** with OpenAPI/Swagger support
+-  Docker-compose for easy local development and testing 
 
 ---
 
 ## Repository Structure (Domain-Driven Design)
 ```
-ship.ses.extractor/
+ship.ses.extractor.mapping.api/
 │── src/
-│   ├── Ship.Ses.Extractor.Api/          # API layer (if applicable)
-│   ├── Ship.Ses.Extractor.Application/  # Application Services (Use Cases, Command Handlers)
-│   ├── Ship.Ses.Extractor.Domain/       # Domain Layer (Entities, Aggregates, Domain Services)
-│   ├── Ship.Ses.Extractor.Infrastructure/ # Infrastructure Layer (Persistence, External Integrations)
-│   ├── Ship.Ses.Extractor.Worker/       # Background worker service for scheduled extractions
+│ ├── Ship.Ses.Extractor.Application/ # Application Services (Use Cases, Command Handlers)
+│ ├── Ship.Ses.Extractor.Domain/ # Domain Layer (Entities, Aggregates, Domain Services)
+│ ├── Ship.Ses.Extractor.Infrastructure/ # Infrastructure Layer (Persistence, External Integrations)
+│ ├── Ship.Ses.Extractor.Presentation.Api/ # ASP.NET Web API project (Controllers, DI setup)
+│
 │── tests/
-│   ├── Ship.Ses.Extractor.UnitTests/    # Unit tests for domain & application logic
-│   ├── Ship.Ses.Extractor.IntegrationTests/ # Integration tests for API & DB interactions
-│── docker-compose.yml
-│── README.md
+│ ├── Ship.Ses.Extractor.UnitTests/ # Unit tests for domain & application logic
+│ ├── Ship.Ses.Extractor.IntegrationTests/ # Integration tests for API & database
+│
+│── docker-compose.yml # Dockerized setup for local development (DB, API)
+│── Ship.Ses.Extractor.sln # Visual Studio Solution
 │── .gitignore
 │── LICENSE
-│── Ship.Ses.Extractor.sln
+│── README.md
 ```
 
 ---
+## Tech Stack
 
-## Installation
-### **Prerequisites**
-- **.NET 8.0+**
-- **Docker** (for containerized deployments)
-- **SQL Server / PostgreSQL** (for database extraction)
-- **RabbitMQ / Kafka** (for event-driven extraction)
-
-### **Clone the Repository**
-```sh
-ggit clone https://olasunkanmifadayomi@bitbucket.org/interswitch/ship-ses-extractor-service.git
-cd ship-ses-extractor-service
-```
-
-### **Setup Configuration**
-- Copy `.env.example` to `.env` and configure your environment variables:
-  ```sh
-  cp .env.example .env
-  ```
-
-- Edit `.env` with your preferred settings:
-  ```ini
-  DB_CONNECTION_STRING="Host=localhost;Database=ses_db;Username=ses_user;Password=your_password"
-  FHIR_API_URL="https://fhir.emr.local"
-  CUSTOM_API_URL="https://legacy-emr.local/api"
-  SFTP_HOST="sftp.server.local"
-  ```
+- [.NET 8](https://dotnet.microsoft.com/)
+- ASP.NET Core Web API
+- Entity Framework Core (PostgreSQL or MySQL)
+- MongoDB (for FHIR sync pool)
+- xUnit & FluentAssertions (testing)
+- Docker & Docker Compose
 
 ---
 
-## Running the Application
-### **Run with Docker**
-```sh
+## Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://xxxxxx/ship.ses.extractor.mapping.api.git
+cd ship.ses.extractor.mapping.api
+**Run Locally via Docker**
+
 docker-compose up --build
-```
+This spins up:
 
-### **Run Locally**
-1. Restore dependencies:
-   ```sh
-   dotnet restore
-   ```
-2. Build the solution:
-   ```sh
-   dotnet build
-   ```
-3. Run the background worker:
-   ```sh
-   dotnet run --project src/Ship.Ses.Extractor.Worker
-   ```
+Mapping API (on http://localhost:5000)
 
----
+**Access API Docs**
+Once running, open:
 
-## Configuration
-The application is configured using **`appsettings.json`** and supports **environment-based configurations**.
+http://localhost:5000/swagger
 
-Example `appsettings.json`:
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft": "Warning",
-      "System": "Error"
-    }
-  },
-  "Database": {
-    
-  },
-  "ApiSettings": {
-    "FhirBaseUrl": "https://fhir.emr.local",
-    "CustomApiBaseUrl": "https://legacy-emr.local/api"
-  }
-}
-```
+**Running Tests**
 
----
+dotnet test Ship.Ses.Extractor.UnitTests
+dotnet test Ship.Ses.Extractor.IntegrationTests
 
-## API Endpoints
-| **Method** | **Endpoint** | **Description** |
-|-----------|-------------|-----------------|
-| `POST` | `/extract/fhir/patient` | Extract patient data from FHIR API |
+Packaging & Deployment
+To build the API for production:
 
 
----
+dotnet publish ./src/Ship.Ses.Extractor.Presentation.Api -c Release -o ./publish
+Use Docker or your preferred CI/CD pipeline for deployment.
 
-## Authentication
-
-### **Example Authorization Header**
-```http
-
-```
-
----
-
-## Logging & Monitoring
-SHIP Ses logs events using **Serilog**, and all logs are forwarded to **ELK Stack (Elasticsearch, Logstash, Kibana)**.
-
-### **Log Example**
-```json
-{
-  "timestamp": "2025-02-15T12:30:45Z",
-  "level": "Information",
-  "message": "Patient data extracted successfully",
-  "context": {
-    "patientId": "12345",
-    "source": "FHIR API"
-  }
-}
-```
-
----
-
-## Testing
-Run **unit tests**:
-```sh
-dotnet test
-```
-Run **integration tests**:
-```sh
-dotnet test tests/Ship.Ses.Extractor.IntegrationTests
-```
-
----
-
-## Deployment
-**Kubernetes Helm Chart Deployment**
-```sh
-helm upgrade --install ses-extractor charts/ses-extractor
-```
-
-**Azure Deployment (Using ACR & AKS)**
-```sh
-az acr build --image ses-extractor:v1.0 --registry shipcontainerregistry .
-az aks deploy --name ses-extractor --image shipcontainerregistry/ses-extractor:v1.0
-```
-
----
-
-## License
-📜 *
-
----
-
-## Contacts & Support
-- 📧 **Support**: support@
-- 🚀 **Contributors**: @ses  
-- 📚 **Docs**: [Confluence Page](https://confluence.ses.io/docs)
-
----
+**Related Projects**
+SHIP Edge Server Extractor
+SHIP Developer Portal
+FHIR Mapping UI (Blazor)
+**Contributing**
+We welcome contributions! Please open issues for feature requests or bug reports. Fork and submit pull requests via feature branches (e.g., feature/mapping-ui-enhancement).
