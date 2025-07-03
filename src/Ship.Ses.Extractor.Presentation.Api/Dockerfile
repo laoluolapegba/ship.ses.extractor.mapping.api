@@ -13,6 +13,10 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Ship.Ses.Extractor.Presentation.Api/Ship.Ses.Extractor.Presentation.Api.csproj", "src/Ship.Ses.Extractor.Presentation.Api/"]
+COPY ["src/Ship.Ses.Extractor.Application/Ship.Ses.Extractor.Application.csproj", "src/Ship.Ses.Extractor.Application/"]
+COPY ["src/Ship.Ses.Extractor.Domain/Ship.Ses.Extractor.Domain.csproj", "src/Ship.Ses.Extractor.Domain/"]
+COPY ["src/Ship.Ses.Extractor.Shared/Ship.Ses.Extractor.Shared.csproj", "src/Ship.Ses.Extractor.Shared/"]
+COPY ["src/Ship.Ses.Extractor.Infrastructure/Ship.Ses.Extractor.Infrastructure.csproj", "src/Ship.Ses.Extractor.Infrastructure/"]
 RUN dotnet restore "./src/Ship.Ses.Extractor.Presentation.Api/Ship.Ses.Extractor.Presentation.Api.csproj"
 COPY . .
 WORKDIR "/src/src/Ship.Ses.Extractor.Presentation.Api"
