@@ -29,8 +29,4 @@
     <ProjectReference Include="..\Ship.Ses.Extractor.Infrastructure\Ship.Ses.Extractor.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
-
 </Project>

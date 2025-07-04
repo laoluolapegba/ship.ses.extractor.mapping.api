@@ -73,7 +73,11 @@ namespace Ship.Ses.Extractor.Application.Services.Extractors
 
             _facilityId = potentialFacilityId;
         }
-
+        /// <summary>
+        /// unused method, but may be useful for future implementations
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task ExtractAndPersistAsync(CancellationToken cancellationToken = default)
         {
             var correlationId = Guid.NewGuid().ToString();
@@ -137,7 +141,7 @@ namespace Ship.Ses.Extractor.Application.Services.Extractors
                                 ErrorMessage = errorMessage,
                                 CreatedAt = DateTime.UtcNow,
                                 LastAttemptAt = DateTime.UtcNow,
-                               
+
                             }, cancellationToken);
 
                             continue; // Skip persistence
@@ -182,7 +186,7 @@ namespace Ship.Ses.Extractor.Application.Services.Extractors
                             _logger.LogInformation("Successfully persisted record {SourceId}", sourceId);
                         }
 
-                       
+
 
                         await _syncTrackingRepository.AddOrUpdateAsync(tracking, cancellationToken);
                     }
