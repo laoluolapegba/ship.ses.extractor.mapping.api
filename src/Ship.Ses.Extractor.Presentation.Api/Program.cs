@@ -64,9 +64,6 @@ try
         options.AssumeDefaultVersionWhenUnspecified = true; // Use the default version when no version is specified
         options.ReportApiVersions = true; // Report API versions in the response headers
 
-        // You can choose how to read the API version (e.g., from query string, header, or URL segment)
-        // options.ApiVersionReader = new QueryStringApiVersionReader("api-version"); // e.g., ?api-version=1.0
-        // options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version"); // e.g., X-API-Version: 1.0
         options.ApiVersionReader = ApiVersionReader.Combine(
             new QueryStringApiVersionReader("api-version"),
             new HeaderApiVersionReader("X-API-Version"),

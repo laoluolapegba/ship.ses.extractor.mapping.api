@@ -38,7 +38,7 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
 
-        
+
         public async Task<IEnumerable<string>> GetTableNamesAsync()
         {
             var tables = new List<string>();
@@ -46,11 +46,31 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
             using var connection = CreateConnection();
             await connection.OpenAsync();
 
-            // Query depends on the database type
-            string query = GetTableNamesQuery();
-
             using var command = connection.CreateCommand();
-            command.CommandText = query;
+
+            if (_connection.DatabaseType == DatabaseType.MySql)
+            {
+                command.CommandText = @"SELECT TABLE_NAME 
+                                FROM INFORMATION_SCHEMA.TABLES 
+                                WHERE TABLE_SCHEMA = @schema 
+                                  AND TABLE_TYPE = 'BASE TABLE'";
+                var param = command.CreateParameter();
+                param.ParameterName = "@schema";
+                param.Value = _connection.DatabaseName;
+                command.Parameters.Add(param);
+            }
+            else if (_connection.DatabaseType == DatabaseType.PostgreSql)
+            {
+                command.CommandText = "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'";
+            }
+            else if (_connection.DatabaseType == DatabaseType.MsSql)
+            {
+                command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'";
+            }
+            else
+            {
+                throw new NotSupportedException($"Database type {_connection.DatabaseType} is not supported");
+            }
 
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -61,6 +81,7 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
             return tables;
         }
 
+
         public async Task<TableSchema> GetTableSchemaAsync(string tableName)
         {
             var columns = new List<ColumnSchema>();
@@ -68,14 +89,38 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
             using var connection = CreateConnection();
             await connection.OpenAsync();
 
-            // Get primary key columns
             var primaryKeyColumns = await GetPrimaryKeyColumnsAsync(connection, tableName);
 
-            // Query depends on the database type
-            string query = GetColumnSchemaQuery(tableName);
-
             using var command = connection.CreateCommand();
-            command.CommandText = query;
+
+            if (_connection.DatabaseType == DatabaseType.MySql)
+            {
+                command.CommandText = @"
+            SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = @schema 
+              AND TABLE_NAME = @table";
+
+                command.Parameters.Add(CreateParam(command, "@schema", _connection.DatabaseName));
+                command.Parameters.Add(CreateParam(command, "@table", tableName));
+            }
+            else if (_connection.DatabaseType == DatabaseType.PostgreSql)
+            {
+                command.CommandText = @"
+            SELECT column_name as COLUMN_NAME, data_type as DATA_TYPE, is_nullable as IS_NULLABLE 
+            FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+              AND table_name = @table";
+                command.Parameters.Add(CreateParam(command, "@table", tableName));
+            }
+            else if (_connection.DatabaseType == DatabaseType.MsSql)
+            {
+                command.CommandText = @"
+            SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_NAME = @table";
+                command.Parameters.Add(CreateParam(command, "@table", tableName));
+            }
 
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -90,67 +135,106 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
 
             return new TableSchema(tableName, columns);
         }
-        private string GetTableNamesQuery()
+
+        private string GetTableNamesQuery(DbCommand command)
         {
-            return _connection.DatabaseType switch
+            switch (_connection.DatabaseType)
             {
-                DatabaseType.MySql =>
-                    $"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{_connection.DatabaseName}' AND TABLE_TYPE = 'BASE TABLE'",
+                case DatabaseType.MySql:
+                    command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = @schema AND TABLE_TYPE = 'BASE TABLE'";
+                    command.Parameters.Add(CreateParam(command, "@schema", _connection.DatabaseName));
+                    break;
 
-                DatabaseType.PostgreSql =>
-                    "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'",
+                case DatabaseType.PostgreSql:
+                    command.CommandText = "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'";
+                    break;
 
-                DatabaseType.MsSql =>
-                    "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'",
+                case DatabaseType.MsSql:
+                    command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'";
+                    break;
 
-                _ => throw new NotSupportedException($"Database type {_connection.DatabaseType} is not supported")
-            };
+                default:
+                    throw new NotSupportedException($"Database type {_connection.DatabaseType} is not supported");
+            }
+
+            return command.CommandText;
         }
-        private string GetColumnSchemaQuery(string tableName)
+
+        private string GetColumnSchemaQuery(string tableName, DbCommand command)
         {
-            return _connection.DatabaseType switch
+            switch (_connection.DatabaseType)
             {
-                DatabaseType.MySql =>
-                    $"SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{_connection.DatabaseName}' AND TABLE_NAME = '{tableName}'",
+                case DatabaseType.MySql:
+                    command.CommandText = @"
+                SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = @schema 
+                  AND TABLE_NAME = @table";
+                    command.Parameters.Add(CreateParam(command, "@schema", _connection.DatabaseName));
+                    command.Parameters.Add(CreateParam(command, "@table", tableName));
+                    break;
 
-                DatabaseType.PostgreSql =>
-                    $"SELECT column_name as COLUMN_NAME, data_type as DATA_TYPE, is_nullable as IS_NULLABLE FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '{tableName}'",
+                case DatabaseType.PostgreSql:
+                    command.CommandText = @"
+                SELECT column_name as COLUMN_NAME, data_type as DATA_TYPE, is_nullable as IS_NULLABLE 
+                FROM information_schema.columns 
+                WHERE table_schema = 'public' 
+                  AND table_name = @table";
+                    command.Parameters.Add(CreateParam(command, "@table", tableName));
+                    break;
 
-                DatabaseType.MsSql =>
-                    $"SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName}'",
+                case DatabaseType.MsSql:
+                    command.CommandText = @"
+                SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_NAME = @table";
+                    command.Parameters.Add(CreateParam(command, "@table", tableName));
+                    break;
 
-                _ => throw new NotSupportedException($"Database type {_connection.DatabaseType} is not supported")
-            };
+                default:
+                    throw new NotSupportedException($"Database type {_connection.DatabaseType} is not supported");
+            }
+
+            return command.CommandText;
         }
+
 
         private async Task<HashSet<string>> GetPrimaryKeyColumnsAsync(DbConnection connection, string tableName)
         {
             var primaryKeys = new HashSet<string>();
-
-            string query = _connection.DatabaseType switch
-            {
-                DatabaseType.MySql =>
-                    $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '{_connection.DatabaseName}' AND TABLE_NAME = '{tableName}' AND CONSTRAINT_NAME = 'PRIMARY'",
-
-                DatabaseType.PostgreSql =>
-                    $@"SELECT a.attname as COLUMN_NAME
-                       FROM pg_index i
-                       JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
-                       WHERE i.indrelid = '{tableName}'::regclass AND i.indisprimary",
-
-                DatabaseType.MsSql =>
-                    $@"SELECT c.name as COLUMN_NAME
-                       FROM sys.indexes i
-                       INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
-                       INNER JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
-                       INNER JOIN sys.tables t ON i.object_id = t.object_id
-                       WHERE i.is_primary_key = 1 AND t.name = '{tableName}'",
-
-                _ => throw new NotSupportedException($"Database type {_connection.DatabaseType} is not supported")
-            };
-
             using var command = connection.CreateCommand();
-            command.CommandText = query;
+
+            if (_connection.DatabaseType == DatabaseType.MySql)
+            {
+                command.CommandText = @"
+            SELECT COLUMN_NAME 
+            FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+            WHERE TABLE_SCHEMA = @schema 
+              AND TABLE_NAME = @table 
+              AND CONSTRAINT_NAME = 'PRIMARY'";
+                command.Parameters.Add(CreateParam(command, "@schema", _connection.DatabaseName));
+                command.Parameters.Add(CreateParam(command, "@table", tableName));
+            }
+            else if (_connection.DatabaseType == DatabaseType.PostgreSql)
+            {
+                command.CommandText = @"
+            SELECT a.attname as COLUMN_NAME
+            FROM pg_index i
+            JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
+            WHERE i.indrelid = @table::regclass AND i.indisprimary";
+                command.Parameters.Add(CreateParam(command, "@table", tableName));
+            }
+            else if (_connection.DatabaseType == DatabaseType.MsSql)
+            {
+                command.CommandText = @"
+            SELECT c.name as COLUMN_NAME
+            FROM sys.indexes i
+            INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+            INNER JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+            INNER JOIN sys.tables t ON i.object_id = t.object_id
+            WHERE i.is_primary_key = 1 AND t.name = @table";
+                command.Parameters.Add(CreateParam(command, "@table", tableName));
+            }
 
             using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -160,6 +244,7 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
 
             return primaryKeys;
         }
+
         public async Task TestConnectionAsync()
         {
             using var connection = CreateConnection();
@@ -396,6 +481,13 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
             }
 
             return columns;
+        }
+        private static DbParameter CreateParam(DbCommand command, string name, object value)
+        {
+            var param = command.CreateParameter();
+            param.ParameterName = name;
+            param.Value = value ?? DBNull.Value;
+            return param;
         }
     }
 }

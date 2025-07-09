@@ -27,7 +27,7 @@ namespace Ship.Ses.Extractor.Presentation.Api.Extensions
                 Title = $"Ship.Ses.Extractor API {description.ApiVersion}",
                 Version = description.ApiVersion.ToString(),
                 Description = "AAPI for mapping EMR fields to FHIR resources.",
-                Contact = new OpenApiContact { Name = "Interswitch", Email = "contact@interswitchgroup.com" },
+                Contact = new OpenApiContact { Name = "Interswitch", Email = "contact@interswitchng.com" },
                 //License = new OpenApiLicense { Name = "MIT License", Url = new Uri("https://opensource.org/licenses/MIT") } // Example license
             };
 
