@@ -12,18 +12,49 @@ using Ship.Ses.Extractor.Domain.Entities.DataMapping;
 using Ship.Ses.Extractor.Infrastructure.Services;
 using Ship.Ses.Extractor.Presentation.Api.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
 
 try
 {
+    // Main entry point for the application
+    // Configure Serilog for structured logging
+    Log.Logger = new LoggerConfiguration()
+         .ReadFrom.Configuration(Host.CreateApplicationBuilder().Configuration)
+         .Enrich.FromLogContext()
+         .WriteTo.Console()
+         .CreateLogger();
+
     var builder = WebApplication.CreateBuilder(args);
+    if (!builder.Environment.IsDevelopment())
+    {
+        
+        // Make sure your appsettings.json or environment variables configure KeyVault:Uri
+        // and appropriate access policies are set in Azure.
+        // var keyVaultUri = builder.Configuration["KeyVault:Uri"];
+        // if (!string.IsNullOrEmpty(keyVaultUri))
+        // {
+        //     builder.Configuration.AddAzureKeyVault(
+        //         new Uri(keyVaultUri),
+        //         new DefaultAzureCredential()); // Use appropriate credential based on your setup
+        //     app.Logger.LogInformation("🔐 Sensitive configurations loaded from Azure Key Vault.");
+        // }
+        // else
+        // {
+        //     app.Logger.LogWarning("KeyVault:Uri not configured for production environment. Sensitive data might be sourced from less secure locations.");
+        // }
+    }
+    else
+    {
+        // 2. For Development: Use User Secrets for sensitive data
+        // This is a secure way to store secrets during development outside of your source control.
+        // It will automatically load secrets from %APPDATA%\Microsoft\UserSecrets\<UserSecretsId>\secrets.json
+        builder.Configuration.AddUserSecrets<Program>();
+        Log.Information("Local sensitive configurations loaded from User Secrets.");
+    }
 
     const string AllowBlazorClient = "AllowBlazorClient";
-    // Configure Serilog
-    Log.Logger = new LoggerConfiguration()
-        .ReadFrom.Configuration(builder.Configuration)
-        .Enrich.FromLogContext()
-        .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
-        .CreateLogger();
+    
 
     builder.Host.UseSerilog();
 
