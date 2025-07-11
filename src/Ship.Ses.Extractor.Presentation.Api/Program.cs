@@ -13,6 +13,8 @@ using Ship.Ses.Extractor.Infrastructure.Services;
 using Ship.Ses.Extractor.Presentation.Api.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using VaultSharp;
+using VaultSharp.V1.AuthMethods.Kubernetes;
 
 
 try
@@ -28,27 +30,30 @@ try
     var builder = WebApplication.CreateBuilder(args);
     if (!builder.Environment.IsDevelopment())
     {
-        
-        // Make sure your appsettings.json or environment variables configure KeyVault:Uri
-        // and appropriate access policies are set in Azure.
-        // var keyVaultUri = builder.Configuration["KeyVault:Uri"];
-        // if (!string.IsNullOrEmpty(keyVaultUri))
-        // {
-        //     builder.Configuration.AddAzureKeyVault(
-        //         new Uri(keyVaultUri),
-        //         new DefaultAzureCredential()); // Use appropriate credential based on your setup
-        //     app.Logger.LogInformation("🔐 Sensitive configurations loaded from Azure Key Vault.");
-        // }
-        // else
-        // {
-        //     app.Logger.LogWarning("KeyVault:Uri not configured for production environment. Sensitive data might be sourced from less secure locations.");
-        // }
+
+        var vaultConfig = builder.Configuration.GetSection("Vault");
+        if (vaultConfig.GetValue<bool>("Enabled"))
+        {
+            var vaultService = new VaultService(
+                vaultUri: vaultConfig["Uri"],
+                role: vaultConfig["Role"],
+                mountPath: vaultConfig["Mount"],
+                secretsPath: vaultConfig["SecretsPath"]
+            );
+
+            var secrets = await vaultService.GetSecretsAsync();
+
+            foreach (var kvp in secrets)
+            {
+                builder.Configuration[$"EmrDatabase:{kvp.Key}"] = kvp.Value;
+            }
+
+            Log.Information("Vault secrets injected into configuration.");
+        }
     }
     else
     {
-        // 2. For Development: Use User Secrets for sensitive data
-        // This is a secure way to store secrets during development outside of your source control.
-        // It will automatically load secrets from %APPDATA%\Microsoft\UserSecrets\<UserSecretsId>\secrets.json
+        //For Development
         builder.Configuration.AddUserSecrets<Program>();
         Log.Information("Local sensitive configurations loaded from User Secrets.");
     }

@@ -32,6 +32,7 @@
     <PackageReference Include="StackExchange.Redis" Version="2.8.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.8.1" />
+    <PackageReference Include="VaultSharp" Version="1.17.5.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ship.Ses.Extractor.Application\Ship.Ses.Extractor.Application.csproj" />

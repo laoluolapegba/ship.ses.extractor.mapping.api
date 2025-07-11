@@ -27,34 +27,50 @@ namespace Ship.Ses.Extractor.Infrastructure.Persistance.Repositories
             var dbSettings = _configuration.GetSection("EmrDatabase");
 
             var dbTypeStr = dbSettings["Type"];
-            if (!Enum.TryParse<DatabaseType>(dbTypeStr, ignoreCase: true, out var dbType))
+            if (!Enum.TryParse<DatabaseType>(dbTypeStr, true, out var dbType))
                 throw new ConfigurationErrorsException($"Invalid database type: {dbTypeStr}");
 
-            var connectionString = dbSettings["ConnectionString"];
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new ConfigurationErrorsException("Missing or empty connection string.");
-            DbConnection connection;
-            switch (dbType)
+            var server = dbSettings["Server"];
+            var database = dbSettings["DatabaseName"];
+            var username = dbSettings["Username"];
+            var password = dbSettings["Password"];
+            var portStr = dbSettings["Port"];
+            int.TryParse(portStr, out var port);
+
+            return dbType switch
             {
-                case DatabaseType.MySql:
-                    var mySqlBuilder = new MySqlConnectionStringBuilder(connectionString);
-                    connection = new MySqlConnection(mySqlBuilder.ConnectionString);
-                    break;
+                DatabaseType.MySql => new MySqlConnection(new MySqlConnectionStringBuilder
+                {
+                    Server = server,
+                    Database = database,
+                    UserID = username,
+                    Password = password,
+                    Port = (uint)(port == 0 ? 3306 : port),
+                    SslMode = MySqlSslMode.Preferred
+                }.ConnectionString),
 
-                case DatabaseType.PostgreSql:
-                    var npgsqlBuilder = new NpgsqlConnectionStringBuilder(connectionString);
-                    connection = new NpgsqlConnection(npgsqlBuilder.ConnectionString);
-                    break;
+                DatabaseType.PostgreSql => new NpgsqlConnection(new NpgsqlConnectionStringBuilder
+                {
+                    Host = server,
+                    Database = database,
+                    Username = username,
+                    Password = password,
+                    Port = (port == 0 ? 5432 : port),
+                    SslMode = SslMode.Prefer
+                }.ConnectionString),
 
-                case DatabaseType.MsSql:
-                    var sqlBuilder = new SqlConnectionStringBuilder(connectionString);
-                    connection = new SqlConnection(sqlBuilder.ConnectionString);
-                    break;
+                DatabaseType.MsSql => new SqlConnection(new SqlConnectionStringBuilder
+                {
+                    DataSource = $"{server},{(port == 0 ? 1433 : port)}",
+                    InitialCatalog = database,
+                    UserID = username,
+                    Password = password,
+                    Encrypt = true,
+                    TrustServerCertificate = true
+                }.ConnectionString),
 
-                default:
-                    throw new ArgumentException($"Unsupported database type: {dbType}");
-            }
-            return connection;
+                _ => throw new ConfigurationErrorsException($"Unsupported database type: {dbType}")
+            };
 
         }
 
@@ -62,36 +78,24 @@ namespace Ship.Ses.Extractor.Infrastructure.Persistance.Repositories
         {
             var dbSettings = _configuration.GetSection("EmrDatabase");
 
-            // Validate and parse the database type
             var dbTypeStr = dbSettings["Type"];
-            if (!Enum.TryParse<DatabaseType>(dbTypeStr, ignoreCase: true, out var dbType))
-            {
+            if (!Enum.TryParse<DatabaseType>(dbTypeStr, true, out var dbType))
                 throw new ConfigurationErrorsException($"Invalid database type: {dbTypeStr}");
-            }
 
-            // Validate connection string
-            var connectionString = dbSettings["ConnectionString"];
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new ConfigurationErrorsException("Missing or empty database connection string.");
-            }
-
+            var conn = CreateConnection();
             var optionsBuilder = new DbContextOptionsBuilder<DbContext>();
 
             switch (dbType)
             {
                 case DatabaseType.MySql:
-                    optionsBuilder.UseMySQL(connectionString);
+                    optionsBuilder.UseMySQL(conn);
                     break;
-
                 case DatabaseType.PostgreSql:
-                    optionsBuilder.UseNpgsql(connectionString);
+                    optionsBuilder.UseNpgsql(conn);
                     break;
-
                 case DatabaseType.MsSql:
-                    optionsBuilder.UseSqlServer(connectionString);
+                    optionsBuilder.UseSqlServer(conn);
                     break;
-
                 default:
                     throw new ConfigurationErrorsException($"Unsupported database type: {dbType}");
             }
