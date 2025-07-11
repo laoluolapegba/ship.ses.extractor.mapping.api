@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using MySql.Data.MySqlClient;
+using Npgsql;
 using Ship.Ses.Extractor.Infrastructure.Settings;
 using Ship.Ses.Extractor.Shared.Enums;
 using System;
@@ -31,14 +33,28 @@ namespace Ship.Ses.Extractor.Infrastructure.Persistance.Repositories
             var connectionString = dbSettings["ConnectionString"];
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new ConfigurationErrorsException("Missing or empty connection string.");
-
-            return dbType switch
+            DbConnection connection;
+            switch (dbType)
             {
-                DatabaseType.MySql => new MySqlConnection(connectionString),
-                DatabaseType.PostgreSql => new Npgsql.NpgsqlConnection(connectionString),
-                DatabaseType.MsSql => new Microsoft.Data.SqlClient.SqlConnection(connectionString),
-                _ => throw new ArgumentException($"Unsupported database type: {dbType}")
-            };
+                case DatabaseType.MySql:
+                    var mySqlBuilder = new MySqlConnectionStringBuilder(connectionString);
+                    connection = new MySqlConnection(mySqlBuilder.ConnectionString);
+                    break;
+
+                case DatabaseType.PostgreSql:
+                    var npgsqlBuilder = new NpgsqlConnectionStringBuilder(connectionString);
+                    connection = new NpgsqlConnection(npgsqlBuilder.ConnectionString);
+                    break;
+
+                case DatabaseType.MsSql:
+                    var sqlBuilder = new SqlConnectionStringBuilder(connectionString);
+                    connection = new SqlConnection(sqlBuilder.ConnectionString);
+                    break;
+
+                default:
+                    throw new ArgumentException($"Unsupported database type: {dbType}");
+            }
+            return connection;
 
         }
 
