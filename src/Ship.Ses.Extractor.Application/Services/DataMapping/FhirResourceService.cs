@@ -55,8 +55,162 @@ namespace Ship.Ses.Extractor.Application.Services.DataMapping
             var resourceType = await GetResourceTypeByIdAsync(resourceTypeId);
             return resourceType?.Structure;
         }
-
         private string GetPatientStructure()
+        {
+                        return @"
+            {
+              ""resourceType"": ""Patient"",
+              ""id"": ""string"",
+              ""identifier"": [
+                {
+                  ""use"": ""usual | official | temp | secondary | old"",
+                  ""type"": {
+                    ""coding"": [
+                      {
+                        ""system"": ""uri"",
+                        ""code"": ""string"",
+                        ""display"": ""string""
+                      }
+                    ],
+                    ""text"": ""string""
+                  },
+                  ""system"": ""uri"",
+                  ""value"": ""string"",
+                  ""period"": {
+                    ""start"": ""dateTime"",
+                    ""end"": ""dateTime""
+                  },
+                  ""assigner"": {
+                    ""display"": ""string""
+                  }
+                }
+              ],
+              ""active"": ""boolean"",
+              ""name"": [
+                {
+                  ""use"": ""usual | official | temp | nickname | anonymous | old | maiden"",
+                  ""text"": ""string"",
+                  ""family"": ""string"",
+                  ""given"": [""string""],
+                  ""prefix"": [""string""],
+                  ""suffix"": [""string""],
+                  ""period"": {
+                    ""start"": ""dateTime"",
+                    ""end"": ""dateTime""
+                  }
+                }
+              ],
+              ""telecom"": [
+                {
+                  ""system"": ""phone | fax | email | pager | url | sms | other"",
+                  ""value"": ""string"",
+                  ""use"": ""home | work | temp | old | mobile"",
+                  ""rank"": ""positiveInt"",
+                  ""period"": {
+                    ""start"": ""dateTime"",
+                    ""end"": ""dateTime""
+                  }
+                }
+              ],
+              ""gender"": ""male | female | other | unknown"",
+              ""birthDate"": ""date"",
+              ""deceasedBoolean"": ""boolean"",
+              ""deceasedDateTime"": ""dateTime"",
+              ""address"": [
+                {
+                  ""use"": ""home | work | temp | old | billing"",
+                  ""type"": ""postal | physical | both"",
+                  ""text"": ""string"",
+                  ""line"": [""string""],
+                  ""city"": ""string"",
+                  ""district"": ""string"",
+                  ""state"": ""string"",
+                  ""postalCode"": ""string"",
+                  ""country"": ""string"",
+                  ""period"": {
+                    ""start"": ""dateTime"",
+                    ""end"": ""dateTime""
+                  }
+                }
+              ],
+              ""maritalStatus"": {
+                ""coding"": [
+                  {
+                    ""system"": ""http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"",
+                    ""code"": ""string"",
+                    ""display"": ""string""
+                  }
+                ],
+                ""text"": ""string""
+              },
+              ""multipleBirthBoolean"": ""boolean"",
+              ""multipleBirthInteger"": ""integer"",
+              ""photo"": [
+                {
+                  ""contentType"": ""string"",
+                  ""language"": ""string"",
+                  ""data"": ""base64Binary"",
+                  ""url"": ""uri"",
+                  ""size"": ""integer"",
+                  ""hash"": ""base64Binary"",
+                  ""title"": ""string"",
+                  ""creation"": ""dateTime""
+                }
+              ],
+              ""contact"": [
+                {
+                  ""relationship"": [
+                    {
+                      ""coding"": [
+                        {
+                          ""system"": ""uri"",
+                          ""code"": ""string"",
+                          ""display"": ""string""
+                        }
+                      ],
+                      ""text"": ""string""
+                    }
+                  ],
+                  ""name"": {
+                    ""use"": ""official"",
+                    ""text"": ""string"",
+                    ""family"": ""string"",
+                    ""given"": [""string""],
+                    ""prefix"": [""string""]
+                  },
+                  ""telecom"": [
+                    {
+                      ""system"": ""phone | email"",
+                      ""value"": ""string"",
+                      ""use"": ""home | work"",
+                      ""rank"": 1
+                    }
+                  ],
+                  ""address"": {
+                    ""line"": [""string""],
+                    ""city"": ""string"",
+                    ""state"": ""string"",
+                    ""country"": ""string""
+                  },
+                  ""gender"": ""male | female | other | unknown"",
+                  ""organization"": {
+                    ""reference"": ""Organization/id"",
+                    ""display"": ""string""
+                  },
+                  ""period"": {
+                    ""start"": ""dateTime"",
+                    ""end"": ""dateTime""
+                  }
+                }
+              ],
+              ""managingOrganization"": {
+                ""reference"": ""Organization/id"",
+                ""display"": ""string""
+              }
+            }";
+                    }
+
+        private string GetPatientStructure1()
         {
             return @"{
                 ""resourceType"": ""Patient"",

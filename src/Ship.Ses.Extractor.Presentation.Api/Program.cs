@@ -24,32 +24,33 @@ try
     Log.Logger = new LoggerConfiguration()
          .ReadFrom.Configuration(Host.CreateApplicationBuilder().Configuration)
          .Enrich.FromLogContext()
-         .WriteTo.Console()
+         //.WriteTo.Console()
          .CreateLogger();
 
     var builder = WebApplication.CreateBuilder(args);
     if (!builder.Environment.IsDevelopment())
     {
+        Log.Information("Vault secrets injected into configuration.");
 
-        var vaultConfig = builder.Configuration.GetSection("Vault");
-        if (vaultConfig.GetValue<bool>("Enabled"))
-        {
-            var vaultService = new VaultService(
-                vaultUri: vaultConfig["Uri"],
-                role: vaultConfig["Role"],
-                mountPath: vaultConfig["Mount"],
-                secretsPath: vaultConfig["SecretsPath"]
-            );
+        //var vaultConfig = builder.Configuration.GetSection("Vault");
+        //if (vaultConfig.GetValue<bool>("Enabled"))
+        //{
+        //    var vaultService = new VaultService(
+        //        vaultUri: vaultConfig["Uri"],
+        //        role: vaultConfig["Role"],
+        //        mountPath: vaultConfig["Mount"],
+        //        secretsPath: vaultConfig["SecretsPath"]
+        //    );
 
-            var secrets = await vaultService.GetSecretsAsync();
+        //    var secrets = await vaultService.GetSecretsAsync();
 
-            foreach (var kvp in secrets)
-            {
-                builder.Configuration[$"EmrDatabase:{kvp.Key}"] = kvp.Value;
-            }
+        //    foreach (var kvp in secrets)
+        //    {
+        //        builder.Configuration[$"EmrDatabase:{kvp.Key}"] = kvp.Value;
+        //    }
 
-            Log.Information("Vault secrets injected into configuration.");
-        }
+        //    Log.Information("Vault secrets injected into configuration.");
+        //}
     }
     else
     {
@@ -142,7 +143,7 @@ try
     var app = builder.Build();
 
     // Log application startup
-    app.Logger.LogInformation("🚀 Application starting up");
+    app.Logger.LogInformation("Application starting up");
 
     // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
     // specifying the Swagger JSON endpoint.
@@ -161,7 +162,7 @@ try
     // Configure middleware
     if (app.Environment.IsDevelopment())
     {
-        app.Logger.LogInformation("🛠️ Development environment detected"); app.UseDeveloperExceptionPage();
+        app.Logger.LogInformation("🛠 Development environment detected"); app.UseDeveloperExceptionPage();
     }
     else
     {
@@ -180,7 +181,7 @@ try
     app.MapControllers();
 
     // Log application ready
-    app.Logger.LogInformation("✅ Application started and ready to accept requests");
+    app.Logger.LogInformation(" Application started and ready to accept requests");
 
     app.Run();
 }

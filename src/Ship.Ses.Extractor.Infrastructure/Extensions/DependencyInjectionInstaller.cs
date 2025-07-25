@@ -21,14 +21,9 @@ namespace Ship.Ses.Extractor.Infrastructure.Installers
         }
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            // Register DbContext
-            services.AddDbContext<ExtractorDbContext>(options =>
-                options.UseMySQL(
-                    configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly(typeof(ExtractorDbContext).Assembly.FullName)));
-
+            
             // Register EMR database services
-            services.AddSingleton<EmrDbContextFactory>();
+            services.AddSingleton<EmrPersistenceFactory>();
             services.AddScoped<IEmrDatabaseReader, EmrDatabaseReader>();
 
             // Register repositories

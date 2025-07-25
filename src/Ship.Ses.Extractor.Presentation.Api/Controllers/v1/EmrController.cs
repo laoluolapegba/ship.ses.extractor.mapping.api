@@ -192,7 +192,7 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
         public async Task<IActionResult> SelectConnection(int id)
         {
             var safeId = SafeMessageHelper.Sanitize(id);
-            _logger.LogInformation("📥 Received request to select EMR connection with ID: {ConnectionId}", safeId);
+            _logger.LogInformation(" Received request to select EMR connection with ID: {ConnectionId}", safeId);
             try
             {
                 await _emrDatabaseService.SelectConnectionAsync(id);
@@ -221,13 +221,13 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
         public async Task<IActionResult> GetConnectionById(int id)
         {
             var safeId = SafeMessageHelper.Sanitize(id);
-            _logger.LogInformation("📥 Received request to retrieve EMR connection with ID: {ConnectionId}", safeId);
+            _logger.LogInformation(" Received request to retrieve EMR connection with ID: {ConnectionId}", safeId);
             try
             {
                 var connection = await _connectionRepository.GetByIdAsync(id);
                 if (connection == null)
                 {
-                    _logger.LogWarning("⚠️ EMR connection with ID {ConnectionId} not found", safeId);
+                    _logger.LogWarning(" EMR connection with ID {ConnectionId} not found", safeId);
                     return NotFound($"EMR connection with ID {safeId} not found");
                 }
                 var connectionDto = new EmrConnectionDto
@@ -244,23 +244,17 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
                     CreatedDate = connection.CreatedDate,
                     LastModifiedDate = connection.LastModifiedDate
                 };
-                _logger.LogInformation("📤 Successfully retrieved EMR connection with ID: {ConnectionId}", safeId);
+                _logger.LogInformation(" Successfully retrieved EMR connection with ID: {ConnectionId}", safeId);
                 return Ok(connectionDto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(SafeMessageHelper.Sanitize(ex), "❌ Error retrieving EMR connection with ID {ConnectionId}", safeId);
+                _logger.LogError(SafeMessageHelper.Sanitize(ex), " Error retrieving EMR connection with ID {ConnectionId}", safeId);
                 return StatusCode(500, $"Error retrieving EMR connection with ID {safeId}");
             }
         }
 
-        /// <summary>
-        /// Creates a new EMR connection.
-        /// </summary>
-        [HttpPost("connections")]
-        [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+       
         /// <summary>
         /// Creates a new EMR connection.
         /// </summary>
@@ -271,7 +265,7 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
         public async Task<ActionResult<int>> CreateConnection([FromBody] EmrConnectionDto connectionDto)
         {
             var safeName = SafeMessageHelper.Sanitize(connectionDto?.Name);
-            _logger.LogInformation("📥 Received request to create a new EMR connection: {ConnectionName}", safeName);
+            _logger.LogInformation(" Received request to create a new EMR connection: {ConnectionName}", safeName);
 
             try
             {
@@ -286,17 +280,17 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
                     connectionDto.Password);
 
                 await _connectionRepository.AddAsync(newConnection);
-                _logger.LogInformation("✅ Successfully created EMR connection with ID: {ConnectionId}", newConnection.Id);
+                _logger.LogInformation(" Successfully created EMR connection with ID: {ConnectionId}", newConnection.Id);
                 return CreatedAtAction(nameof(GetConnections), new { id = newConnection.Id }, newConnection.Id);
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(SafeMessageHelper.Sanitize(ex), "⚠️ Invalid EMR connection data: {Message}", ex.Message);
+                _logger.LogWarning(SafeMessageHelper.Sanitize(ex), " Invalid EMR connection data: {Message}", ex.Message);
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(SafeMessageHelper.Sanitize(ex), "❌ Error creating EMR connection: {ConnectionName}", safeName);
+                _logger.LogError(SafeMessageHelper.Sanitize(ex), " Error creating EMR connection: {ConnectionName}", safeName);
                 return StatusCode(500, $"Error creating EMR connection: {ex.Message}");
             }
         }
@@ -313,11 +307,11 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
         public async Task<IActionResult> UpdateConnection(int id, [FromBody] EmrConnectionDto connectionDto)
         {
             var safeId = SafeMessageHelper.Sanitize(id);
-            _logger.LogInformation("📥 Received request to update EMR connection with ID: {ConnectionId}", safeId);
+            _logger.LogInformation(" Received request to update EMR connection with ID: {ConnectionId}", safeId);
 
             if (id != connectionDto.Id)
             {
-                _logger.LogWarning("⚠️ ID mismatch: route ID {RouteId} does not match DTO ID {DtoId}", safeId, SafeMessageHelper.Sanitize(connectionDto.Id));
+                _logger.LogWarning(" ID mismatch: route ID {RouteId} does not match DTO ID {DtoId}", safeId, SafeMessageHelper.Sanitize(connectionDto.Id));
                 return BadRequest("ID mismatch");
             }
 
@@ -326,7 +320,7 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
                 var existingConnection = await _connectionRepository.GetByIdAsync(id);
                 if (existingConnection == null)
                 {
-                    _logger.LogWarning("⚠️ EMR connection with ID {ConnectionId} not found for update.", safeId);
+                    _logger.LogWarning(" EMR connection with ID {ConnectionId} not found for update.", safeId);
                     return NotFound($"EMR connection with ID {safeId} not found.");
                 }
 
@@ -342,7 +336,7 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
                 existingConnection.SetActive(connectionDto.IsActive);
 
                 await _connectionRepository.UpdateAsync(existingConnection);
-                _logger.LogInformation("✅ Successfully updated EMR connection with ID: {ConnectionId}", safeId);
+                _logger.LogInformation(" Successfully updated EMR connection with ID: {ConnectionId}", safeId);
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -352,7 +346,7 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
             }
             catch (Exception ex)
             {
-                _logger.LogError(SafeMessageHelper.Sanitize(ex), "❌ Error updating EMR connection with ID {ConnectionId}", safeId);
+                _logger.LogError(SafeMessageHelper.Sanitize(ex), " Error updating EMR connection with ID {ConnectionId}", safeId);
                 return StatusCode(500, $"Error updating EMR connection with ID {safeId}: {ex.Message}");
             }
         }
@@ -368,7 +362,7 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
         public async Task<IActionResult> DeleteConnection(int id)
         {
             var safeId = SafeMessageHelper.Sanitize(id);
-            _logger.LogInformation("📥 Received request to delete EMR connection with ID: {ConnectionId}", safeId);
+            _logger.LogInformation(" Received request to delete EMR connection with ID: {ConnectionId}", safeId);
 
             try
             {
@@ -402,14 +396,14 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
         public async Task<IActionResult> TestConnectionById(int id)
         {
             var safeId = SafeMessageHelper.Sanitize(id);
-            _logger.LogInformation("📥 Received request to test EMR connection with ID: {ConnectionId}", safeId);
+            _logger.LogInformation(" Received request to test EMR connection with ID: {ConnectionId}", safeId);
 
             try
             {
                 await _emrDatabaseService.SelectConnectionAsync(id); // throws if not found
                 await _emrDatabaseService.TestConnectionAsync();
 
-                _logger.LogInformation("✅ Connection test successful for ID: {ConnectionId}", safeId);
+                _logger.LogInformation(" Connection test successful for ID: {ConnectionId}", safeId);
                 return Ok(new { message = "Connection successful" });
             }
             catch (ArgumentException ex)
@@ -419,7 +413,7 @@ namespace Ship.Ses.Extractor.Presentation.Api.Controllers.v1
             }
             catch (Exception ex)
             {
-                _logger.LogError(SafeMessageHelper.Sanitize(ex), "❌ Error testing EMR connection with ID {Id}.", safeId);
+                _logger.LogError(SafeMessageHelper.Sanitize(ex), " Error testing EMR connection with ID {Id}.", safeId);
                 return StatusCode(500, new { error = SafeMessageHelper.Sanitize(ex.Message) });
             }
         }

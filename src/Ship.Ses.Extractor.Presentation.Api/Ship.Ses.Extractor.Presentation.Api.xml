@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>Ship.Ses.Extractor.Presentation.Api</name>
+        <name>Ship.Ses.Mapping.Presentation.Api</name>
     </assembly>
     <members>
         <member name="M:Ship.Ses.Extractor.Presentation.Api.Controllers.v1.EmrController.SelectConnection(System.Int32)">

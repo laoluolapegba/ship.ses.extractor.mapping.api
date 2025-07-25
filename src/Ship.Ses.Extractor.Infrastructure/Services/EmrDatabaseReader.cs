@@ -18,6 +18,7 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
     using Ship.Ses.Extractor.Shared.Enums;
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
     using System.Data.Common;
     using System.Linq;
@@ -25,10 +26,10 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
 
     public class EmrDatabaseReader : IEmrDatabaseReader
     {
-        private readonly EmrDbContextFactory _dbContextFactory;
+        private readonly EmrPersistenceFactory _dbContextFactory;
         private readonly ILogger<EmrDatabaseReader> _logger;
         private readonly EmrConnection _connection;
-        public EmrDatabaseReader(EmrDbContextFactory dbContextFactory, ILogger<EmrDatabaseReader> logger)
+        public EmrDatabaseReader(EmrPersistenceFactory dbContextFactory, ILogger<EmrDatabaseReader> logger)
         {
             _dbContextFactory = dbContextFactory;
             _logger = logger;
@@ -43,7 +44,7 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
         {
             var tables = new List<string>();
 
-            using var connection = CreateConnection();
+            using var connection = MakeConn();
             await connection.OpenAsync();
 
             using var command = connection.CreateCommand();
@@ -86,7 +87,7 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
         {
             var columns = new List<ColumnSchema>();
 
-            using var connection = CreateConnection();
+            using var connection = MakeConn();
             await connection.OpenAsync();
 
             var primaryKeyColumns = await GetPrimaryKeyColumnsAsync(connection, tableName);
@@ -247,26 +248,47 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
 
         public async Task TestConnectionAsync()
         {
-            using var connection = CreateConnection();
+            using var connection = MakeConn();
             await connection.OpenAsync();
             // If we get here, the connection is successful
         }
 
-        private DbConnection CreateConnection()
+        private DbConnection MakeConn()
         {
+            if (_connection == null)
+                throw new InvalidOperationException("EMR connection settings not initialized.");
+
+            var connectionString = _connection.GetConnectionString();
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new ConfigurationErrorsException("Connection string is null or empty.");
+
             return _connection.DatabaseType switch
             {
-                DatabaseType.MySql => new MySqlConnection(_connection.GetConnectionString()),
-                DatabaseType.PostgreSql => new NpgsqlConnection(_connection.GetConnectionString()),
-                DatabaseType.MsSql => new SqlConnection(_connection.GetConnectionString()),
-                _ => throw new NotSupportedException($"Database type {_connection.DatabaseType} is not supported")
+                DatabaseType.MySql => new MySqlConnection(new MySqlConnectionStringBuilder(connectionString)
+                {
+                    SslMode = MySqlSslMode.Preferred
+                }.ConnectionString),
+
+                DatabaseType.PostgreSql => new NpgsqlConnection(new NpgsqlConnectionStringBuilder(connectionString)
+                {
+                    SslMode = SslMode.Prefer
+                }.ConnectionString),
+
+                DatabaseType.MsSql => new SqlConnection(new SqlConnectionStringBuilder(connectionString)
+                {
+                    Encrypt = true,
+                    TrustServerCertificate = false // only true if validated TLS cert
+                }.ConnectionString),
+
+                _ => throw new NotSupportedException($"Unsupported database type: {_connection.DatabaseType}")
             };
         }
+
         public async Task<TableSchema> GetTableSchemaAsync1(string tableName)
         {
             try
             {
-                using var connection = _dbContextFactory.CreateConnection();
+                using var connection = _dbContextFactory.MakeConn();
                 await connection.OpenAsync();
 
                 var columns = await GetColumnsForTable(connection, tableName);
@@ -283,7 +305,7 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
         {
             try
             {
-                using var connection = _dbContextFactory.CreateConnection();
+                using var connection = _dbContextFactory.MakeConn();
                 await connection.OpenAsync();
                 _logger.LogInformation("Successfully connected to EMR database");
             }
@@ -345,7 +367,7 @@ namespace Ship.Ses.Extractor.Infrastructure.Services
 
             try
             {
-                using var connection = _dbContextFactory.CreateConnection();
+                using var connection = _dbContextFactory.MakeConn();
                 await connection.OpenAsync();
 
                 tables = await GetTableNamesForConnectionType(connection);

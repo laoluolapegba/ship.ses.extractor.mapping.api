@@ -39,7 +39,8 @@
     <ProjectReference Include="..\Ship.Ses.Extractor.Shared\Ship.Ses.Extractor.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Filters\MassTransit\" />
+    <Folder Include="Extraction\" />
+    <Folder Include="Filters\" />
     <Folder Include="Helpers\" />
   </ItemGroup>
 </Project>

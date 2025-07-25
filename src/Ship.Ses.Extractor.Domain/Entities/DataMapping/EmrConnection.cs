@@ -1,8 +1,11 @@
-﻿using Ship.Ses.Extractor.Shared.Enums;
+﻿using MySql.Data.MySqlClient;
+using Npgsql;
+using Ship.Ses.Extractor.Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -124,11 +127,39 @@ namespace Ship.Ses.Extractor.Domain.Entities.DataMapping
         {
             return DatabaseType switch
             {
-                DatabaseType.MySql => $"Server={Server};Port={Port};Database={DatabaseName};Uid={Username};Pwd={Password};",
-                DatabaseType.PostgreSql => $"Host={Server};Port={Port};Database={DatabaseName};Username={Username};Password={Password};",
-                DatabaseType.MsSql => $"Server={Server},{Port};Database={DatabaseName};User Id={Username};Password={Password};TrustServerCertificate=True;",
+                DatabaseType.MySql => new MySqlConnectionStringBuilder
+                {
+                    Server = Server,
+                    Port = (uint)(Port == 0 ? 3306 : Port),
+                    Database = DatabaseName,
+                    UserID = Username,
+                    Password = Password,
+                    SslMode = MySqlSslMode.Preferred
+                }.ConnectionString,
+
+                DatabaseType.PostgreSql => new NpgsqlConnectionStringBuilder
+                {
+                    Host = Server,
+                    Port = (Port == 0 ? 5432 : Port),
+                    Database = DatabaseName,
+                    Username = Username,
+                    Password = Password,
+                    SslMode = SslMode.Prefer
+                }.ConnectionString,
+
+                DatabaseType.MsSql => new SqlConnectionStringBuilder
+                {
+                    DataSource = $"{Server},{(Port == 0 ? 1433 : Port)}",
+                    InitialCatalog = DatabaseName,
+                    UserID = Username,
+                    Password = Password,
+                    Encrypt = true,
+                    TrustServerCertificate = true // change to false if using real certs
+                }.ConnectionString,
+
                 _ => throw new NotSupportedException($"Database type {DatabaseType} is not supported")
             };
         }
+
     }
 }

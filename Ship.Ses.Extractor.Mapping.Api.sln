@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ship.Ses.Extractor.Infrastr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ship.Ses.Extractor.Shared", "src\Ship.Ses.Extractor.Shared\Ship.Ses.Extractor.Shared.csproj", "{684D9570-072F-4698-B019-018371B79FD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ship.Ses.Extractor.Presentation.Api", "src\Ship.Ses.Extractor.Presentation.Api\Ship.Ses.Extractor.Presentation.Api.csproj", "{9C118AF7-FD7F-430E-A17A-BD5248F1EE49}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ship.Ses.Mapping.Presentation.Api", "src\Ship.Ses.Extractor.Presentation.Api\Ship.Ses.Mapping.Presentation.Api.csproj", "{9C118AF7-FD7F-430E-A17A-BD5248F1EE49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
