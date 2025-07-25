@@ -55,7 +55,222 @@ namespace Ship.Ses.Extractor.Application.Services.DataMapping
             var resourceType = await GetResourceTypeByIdAsync(resourceTypeId);
             return resourceType?.Structure;
         }
+
         private string GetPatientStructure()
+        {
+            return @"
+            {
+              ""resourceType"": ""Patient"",
+              ""tableName"": """",
+              ""fields"": [
+                {
+                  ""fhirPath"": ""id"",
+                  ""emrField"": """",
+                  ""dataType"": ""string"",
+                  ""required"": true
+                },
+                {
+                  ""fhirPath"": ""active"",
+                  ""emrField"": """",
+                  ""dataType"": ""bool"",
+                  ""required"": true
+                },
+                {
+                  ""fhirPath"": ""maritalStatus"",
+                  ""required"": true,
+                  ""template"": ""codeableConcept"",
+                  ""emrField"": """",
+                  ""valueSet"": {
+                    ""system"": ""http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"",
+                    ""displayMap"": {
+                      ""S"": ""Single"",
+                      ""M"": ""Married"",
+                      ""D"": ""Divorced"",
+                      ""W"": ""Widowed""
+                    }
+                  }
+                },
+                {
+                  ""fhirPath"": ""name[0]"",
+                  ""required"": true,
+                  ""template"": ""humanName"",
+                  ""emrFieldMap"": {
+                    ""given"": """",
+                    ""family"": """",
+                    ""prefix"": """"
+                  },
+                  ""defaults"": {
+                    ""use"": ""official""
+                  }
+                },
+                {
+                  ""fhirPath"": ""gender"",
+                  ""emrField"": """",
+                  ""dataType"": ""string"",
+                  ""required"": true
+                },
+                {
+                  ""fhirPath"": ""birthDate"",
+                  ""emrField"": """",
+                  ""dataType"": ""date"",
+                  ""format"": ""yyyy-MM-dd"",
+                  ""required"": true
+                },
+                {
+                  ""fhirPath"": ""telecom[0]"",
+                  ""required"": true,
+                  ""template"": ""contactPoint"",
+                  ""emrFieldMap"": {
+                    ""value"": """"
+                  },
+                  ""defaults"": {
+                    ""system"": ""phone"",
+                    ""use"": ""home""
+                  }
+                },
+                {
+                  ""fhirPath"": ""telecom[1]"",
+                  ""template"": ""contactPoint"",
+                  ""emrFieldMap"": {
+                    ""value"": """"
+                  },
+                  ""defaults"": {
+                    ""system"": ""email"",
+                    ""use"": ""work""
+                  }
+                },
+                {
+                  ""fhirPath"": ""address[0]"",
+                  ""required"": true,
+                  ""template"": ""address"",
+                  ""emrFieldMap"": {
+                    ""line[0]"": """",
+                    ""text"": """",
+                    ""city"": """",
+                    ""state"": """",
+                    ""country"": """"
+                  },
+                  ""defaults"": {
+                    ""use"": ""home"",
+                    ""type"": ""physical""
+                  }
+                },
+                {
+                  ""fhirPath"": ""contact[0]"",
+                  ""required"": true,
+                  ""template"": ""contact"",
+                  ""emrFieldMap"": {
+                    ""name.family"": """",
+                    ""name.given[0]"": """",
+                    ""name.prefix"": """",
+                    ""telecom[0].value"": """",
+                    ""telecom[1].value"": """",
+                    ""address.line"": """",
+                    ""address.text"": """",
+                    ""address.city"": """",
+                    ""address.state"": """",
+                    ""address.country"": """",
+                    ""address.use"": ""__default__"",
+                    ""address.type"": ""__default__"",
+                    ""organization.reference"": """",
+                    ""organization.display"": """",
+                    ""gender"": """"
+                  },
+                  ""defaults"": {
+                    ""name.use"": ""official"",
+                    ""address.use"": ""home"",
+                    ""address.type"": ""physical"",
+                    ""telecom[0].system"": ""phone"",
+                    ""telecom[0].use"": ""home"",
+                    ""telecom[1].system"": ""email"",
+                    ""telecom[1].use"": ""work"",
+                    ""relationship"": [
+                      {
+                        ""coding"": [
+                          {
+                            ""system"": ""https://terminology.hl7.org/CodeSystem/v2-0131"",
+                            ""code"": ""N"",
+                            ""display"": ""Next of Kin""
+                          }
+                        ],
+                        ""text"": ""Next of Kin""
+                      },
+                      {
+                        ""coding"": [
+                          {
+                            ""system"": ""https://terminology.hl7.org/CodeSystem/v2-0131"",
+                            ""code"": ""C"",
+                            ""display"": ""Emergency Contact""
+                          }
+                        ],
+                        ""text"": ""Emergency Contact""
+                      }
+                    ],
+                    ""period"": {
+                      ""start"": ""2020-01-01T00:00:00.000Z"",
+                      ""end"": ""2025-01-01T00:00:00.000Z""
+                    }
+                  }
+                },
+                {
+                  ""template"": ""identifier"",
+                  ""fhirPath"": ""identifier[0]"",
+                  ""required"": true,
+                  ""emrFieldPriority"": {
+                    ""national_id"": """",
+                    ""bank_id"": """",
+                    ""passport_id"": """",
+                    ""driver_license"": """",
+                    ""emr_patient_identifier"": """"
+                  },
+                  ""identifierTypeMap"": {
+                    ""nin"": {
+                      ""code"": ""NIN"",
+                      ""display"": ""National Identification Number"",
+                      ""system"": ""http://terminology.hl7.org/CodeSystem/v2-0203"",
+                      ""text"": ""National Identification Number""
+                    },
+                    ""bvn"": {
+                      ""code"": ""BVN"",
+                      ""display"": ""Bank Verification Number"",
+                      ""system"": ""http://terminology.hl7.org/CodeSystem/v2-0203"",
+                      ""text"": ""Bank Verification Number""
+                    },
+                    ""passport_number"": {
+                      ""code"": ""PPN"",
+                      ""display"": ""Passport Number"",
+                      ""system"": ""http://terminology.hl7.org/CodeSystem/v2-0203"",
+                      ""text"": ""Passport Number""
+                    },
+                    ""driver_license"": {
+                      ""code"": ""DL"",
+                      ""display"": ""Drivers License"",
+                      ""system"": ""http://terminology.hl7.org/CodeSystem/v2-0203"",
+                      ""text"": ""Drivers License""
+                    },
+                    ""upi"": {
+                      ""code"": ""UPI"",
+                      ""display"": ""EMR Patient Identifier"",
+                      ""system"": ""http://terminology.hl7.org/CodeSystem/v2-0203"",
+                      ""text"": ""EMR Patient Identifier""
+                    }
+                  },
+                  ""defaults"": {
+                    ""use"": ""official"",
+                    ""system"": ""http://hospital.smarthealth.org/patient-ids""
+                  }
+                },
+                {
+                  ""fhirPath"": ""managingOrganization"",
+                  ""required"": true,
+                  ""template"": ""reference"",
+                  ""source"": ""environment""
+                }
+              ]
+            }";
+        }
+
+        private string GetPatientStructure2()
         {
                         return @"
             {
