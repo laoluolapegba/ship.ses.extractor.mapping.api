@@ -8,7 +8,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <DocumentationFile>Ship.Ses.Extractor.Presentation.Api.xml</DocumentationFile>
+    <DocumentationFile>Ship.Ses.Mapping.Presentation.Api.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

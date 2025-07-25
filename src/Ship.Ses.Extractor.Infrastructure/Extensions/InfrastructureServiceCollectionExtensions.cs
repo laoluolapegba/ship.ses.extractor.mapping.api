@@ -27,10 +27,11 @@ namespace Ship.Ses.Extractor.Infrastructure.Extensions
             // Infra-level services
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            
+
 
 
             // Register UI EMR database services
+            //services.AddSingleton<EmrDbContextFactory>();
             services.AddSingleton<EmrPersistenceFactory>();
             services.AddScoped<IEmrDatabaseReader, EmrDatabaseReader>();
 

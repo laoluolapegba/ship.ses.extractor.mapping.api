@@ -1,18 +1,21 @@
-﻿using Asp.Versioning.ApiExplorer;
-using Asp.Versioning;
-using Serilog;
-using Swashbuckle.AspNetCore.SwaggerGen;
+﻿using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Ship.Ses.Extractor.Application.Interfaces;
-using Ship.Ses.Extractor.Application.Services.DataMapping;
-using Ship.Ses.Extractor.Domain.Repositories.DataMapping;
-using Ship.Ses.Extractor.Infrastructure.Installers;
-using Ship.Ses.Extractor.Infrastructure.Persistance.Repositories;
-using Ship.Ses.Extractor.Domain.Entities.DataMapping;
-using Ship.Ses.Extractor.Infrastructure.Services;
-using Ship.Ses.Extractor.Presentation.Api.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Ship.Ses.Extractor.Application.Interfaces;
+using Ship.Ses.Extractor.Application.Services.DataMapping;
+using Ship.Ses.Extractor.Domain.Entities.DataMapping;
+using Ship.Ses.Extractor.Domain.Repositories.DataMapping;
+using Ship.Ses.Extractor.Infrastructure.Installers;
+using Ship.Ses.Extractor.Infrastructure.Persistance.Contexts;
+using Ship.Ses.Extractor.Infrastructure.Persistance.Repositories;
+using Ship.Ses.Extractor.Infrastructure.Services;
+using Ship.Ses.Extractor.Infrastructure.Settings;
+using Ship.Ses.Extractor.Presentation.Api.Extensions;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods.Kubernetes;
 
@@ -127,7 +130,9 @@ try
 
 
     builder.Services.AddOpenApi();
-
+    // Register DbContext
+    // Add infrastructure services
+    builder.Services.AddInfrastructure(builder.Configuration);
     // Add application services
     builder.Services.AddScoped<IEmrDatabaseService, EmrDatabaseService>();
     builder.Services.AddScoped<Func<EmrConnection, IEmrDatabaseReader>>(serviceProvider => connection =>
@@ -138,8 +143,7 @@ try
     builder.Services.AddScoped<IMappingService, MappingService>();
     builder.Services.AddScoped<IMappingRepository, MappingRepository>();
     builder.Services.AddScoped<IEmrConnectionRepository, EmrConnectionRepository>();
-    // Add infrastructure services
-    builder.Services.AddInfrastructure(builder.Configuration);
+    
     var app = builder.Build();
 
     // Log application startup
