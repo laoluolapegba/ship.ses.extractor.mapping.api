@@ -143,7 +143,8 @@ try
     builder.Services.AddScoped<IMappingService, MappingService>();
     builder.Services.AddScoped<IMappingRepository, MappingRepository>();
     builder.Services.AddScoped<IEmrConnectionRepository, EmrConnectionRepository>();
-    
+    builder.Services.AddSingleton<IHealthService, HealthService>();
+
     var app = builder.Build();
 
     // Log application startup
@@ -177,7 +178,10 @@ try
 
     app.UseSerilogRequestLogging();
 
-    app.UseHttpsRedirection();
+    if (!app.Environment.IsProduction())
+    {
+        app.UseHttpsRedirection();
+    }
     app.UseRouting();
     app.UseCors(AllowBlazorClient);
     app.UseAuthentication();
