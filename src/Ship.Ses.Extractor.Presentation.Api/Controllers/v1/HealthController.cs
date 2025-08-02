@@ -15,7 +15,7 @@ namespace Ship.Ses.Mapping.Presentation.Api.Controllers.v1
     namespace Ship.Ses.Extractor.Presentation.Api.Controllers
     {
         [ApiController]
-        [Route("[controller]")]
+        [Route("/health")]
         public class HealthController : ControllerBase
         {
             private readonly IHealthService _healthService;

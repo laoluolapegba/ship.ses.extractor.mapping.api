@@ -33,27 +33,25 @@ try
     var builder = WebApplication.CreateBuilder(args);
     if (!builder.Environment.IsDevelopment())
     {
-        Log.Information("Vault secrets injected into configuration.");
+        var vaultConfig = builder.Configuration.GetSection("Vault");
+        if (vaultConfig.GetValue<bool>("Enabled"))
+        {
+            var vaultService = new VaultService(
+                vaultUri: vaultConfig["Uri"],
+                role: vaultConfig["Role"],
+                mountPath: vaultConfig["Mount"],
+                secretsPath: vaultConfig["SecretsPath"]
+            );
 
-        //var vaultConfig = builder.Configuration.GetSection("Vault");
-        //if (vaultConfig.GetValue<bool>("Enabled"))
-        //{
-        //    var vaultService = new VaultService(
-        //        vaultUri: vaultConfig["Uri"],
-        //        role: vaultConfig["Role"],
-        //        mountPath: vaultConfig["Mount"],
-        //        secretsPath: vaultConfig["SecretsPath"]
-        //    );
+            var secrets = await vaultService.GetSecretsAsync();
 
-        //    var secrets = await vaultService.GetSecretsAsync();
+            foreach (var kvp in secrets)
+            {
+                builder.Configuration[$"EmrDatabase:{kvp.Key}"] = kvp.Value;
+            }
 
-        //    foreach (var kvp in secrets)
-        //    {
-        //        builder.Configuration[$"EmrDatabase:{kvp.Key}"] = kvp.Value;
-        //    }
-
-        //    Log.Information("Vault secrets injected into configuration.");
-        //}
+            Log.Information("Vault secrets injected into configuration.");
+        }
     }
     else
     {
@@ -145,6 +143,7 @@ try
     builder.Services.AddScoped<IEmrConnectionRepository, EmrConnectionRepository>();
     builder.Services.AddSingleton<IHealthService, HealthService>();
 
+    
     var app = builder.Build();
 
     // Log application startup
@@ -167,29 +166,41 @@ try
     // Configure middleware
     if (app.Environment.IsDevelopment())
     {
-        app.Logger.LogInformation("🛠 Development environment detected"); app.UseDeveloperExceptionPage();
+        app.Logger.LogInformation("Development environment detected"); app.UseDeveloperExceptionPage();
     }
     else
     {
-        app.Logger.LogInformation("🏭 Production environment detected");
+        app.Logger.LogInformation("Production environment detected");
         app.UseExceptionHandler("/Error");
         app.UseHsts();
     }
 
     app.UseSerilogRequestLogging();
 
-    if (!app.Environment.IsProduction())
+    if (app.Environment.IsDevelopment())
     {
-        app.UseHttpsRedirection();
+        app.UseHttpsRedirection(); 
     }
     app.UseRouting();
     app.UseCors(AllowBlazorClient);
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
+    var server = app.Services.GetRequiredService<Microsoft.AspNetCore.Hosting.Server.IServer>();
+    var addresses = server.Features.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>();
 
-    // Log application ready
-    app.Logger.LogInformation(" Application started and ready to accept requests");
+    if (addresses != null)
+    {
+        foreach (var address in addresses.Addresses)
+        {
+            app.Logger.LogInformation("Application is listening on: {Address}", address);
+        }
+    }
+    else
+    {
+        app.Logger.LogWarning("⚠️ Could not determine server addresses (no IServerAddressesFeature found).");
+    }
+    app.Logger.LogInformation("Mapping Api started and ready to accept requests");
 
     app.Run();
 }
