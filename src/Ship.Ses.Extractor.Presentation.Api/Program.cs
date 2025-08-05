@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Ship.Ses.Extractor.Application.Interfaces;
 using Ship.Ses.Extractor.Application.Services.DataMapping;
+using Ship.Ses.Extractor.Domain.Entities;
 using Ship.Ses.Extractor.Domain.Entities.DataMapping;
 using Ship.Ses.Extractor.Domain.Repositories.DataMapping;
 using Ship.Ses.Extractor.Infrastructure.Installers;
@@ -31,24 +32,39 @@ try
          .CreateLogger();
 
     var builder = WebApplication.CreateBuilder(args);
+    builder.Services.Configure<VaultSecrets>(builder.Configuration.GetSection("Vault"));
+
     if (!builder.Environment.IsDevelopment())
     {
         var vaultConfig = builder.Configuration.GetSection("Vault");
+
         if (vaultConfig.GetValue<bool>("Enabled"))
         {
-            var vaultService = new VaultService(
-                vaultUri: vaultConfig["Uri"],
-                role: vaultConfig["Role"],
-                mountPath: vaultConfig["Mount"],
-                secretsPath: vaultConfig["SecretsPath"]
-            );
-
-            var secrets = await vaultService.GetSecretsAsync();
-
-            foreach (var kvp in secrets)
+            builder.Services.AddSingleton(provider =>
             {
-                builder.Configuration[$"EmrDatabase:{kvp.Key}"] = kvp.Value;
-            }
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                return new VaultSecrets
+                {
+                    Username = configuration["USERNAME"], 
+                    Password = configuration["PASSWORD"], 
+                    Server = configuration["SERVER"],
+                    Database = configuration["DATABASE"],
+                    Port = configuration["PORT"]
+                };
+            });
+            //var vaultService = new VaultService(
+            //    vaultUri: vaultConfig["Uri"],
+            //    role: vaultConfig["Role"],
+            //    mountPath: vaultConfig["Mount"],
+            //    secretsPath: vaultConfig["SecretsPath"]
+            //);
+
+            //var secrets = await vaultService.GetSecretsAsync();
+
+            //foreach (var kvp in secrets)
+            //{
+            //    builder.Configuration[$"EmrDatabase:{kvp.Key}"] = kvp.Value;
+            //}
 
             Log.Information("Vault secrets injected into configuration.");
         }
@@ -98,14 +114,14 @@ try
     // 1. Add API Versioning
     builder.Services.AddApiVersioning(options =>
     {
-        options.DefaultApiVersion = new ApiVersion(1, 0); // Default version if not specified
+        options.DefaultApiVersion = new ApiVersion(1, 0); 
         options.AssumeDefaultVersionWhenUnspecified = true; // Use the default version when no version is specified
-        options.ReportApiVersions = true; // Report API versions in the response headers
+        options.ReportApiVersions = true; 
 
         options.ApiVersionReader = ApiVersionReader.Combine(
             new QueryStringApiVersionReader("api-version"),
             new HeaderApiVersionReader("X-API-Version"),
-            new UrlSegmentApiVersionReader()); // Enables versioning in URL path (e.g., /v1/resource)
+            new UrlSegmentApiVersionReader()); 
     });
 
     
@@ -142,8 +158,9 @@ try
     builder.Services.AddScoped<IMappingRepository, MappingRepository>();
     builder.Services.AddScoped<IEmrConnectionRepository, EmrConnectionRepository>();
     builder.Services.AddSingleton<IHealthService, HealthService>();
+    //builder.Services.Configure<VaultSecrets>(builder.Configuration.GetSection("Vault")); 
 
-    
+
     var app = builder.Build();
 
     // Log application startup
